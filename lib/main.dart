@@ -10,23 +10,16 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/theme/theme.dart';
 import 'features/auth/presentation/pages/login_page.dart';
+import 'init_dependencie.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final supabase = await Supabase.initialize(
-    anonKey: AppSecrets.supabaseAnonKey,
-    url: AppSecrets.supabaseUrl,
-  );
+  await initDependecies();
+
   runApp(MultiBlocProvider(
     providers: [
       BlocProvider(
-        create: (context) => AuthBloc(
-          signupUsecase: SignupUsecase(
-            repository: AuthRepositoryImpl(
-              AuthRemoteDataSourceImpl(supabase.client),
-            ),
-          ),
-        ),
+        create: (context) => serviceLocator<AuthBloc>(),
       ),
     ],
     child: const MainApp(),
