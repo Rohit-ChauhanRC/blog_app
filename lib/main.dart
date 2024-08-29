@@ -1,3 +1,4 @@
+import 'package:blog_app/core/common/cubits/app_user/app_user_cubit.dart';
 import 'package:blog_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,6 +14,9 @@ void main() async {
   runApp(MultiBlocProvider(
     providers: [
       BlocProvider(
+        create: (context) => serviceLocator<AppUserCubit>(),
+      ),
+      BlocProvider(
         create: (context) => serviceLocator<AuthBloc>(),
       ),
     ],
@@ -20,15 +24,40 @@ void main() async {
   ));
 }
 
-class MainApp extends StatelessWidget {
+class MainApp extends StatefulWidget {
   const MainApp({super.key});
+
+  @override
+  State<MainApp> createState() => _MainAppState();
+}
+
+class _MainAppState extends State<MainApp> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<AuthBloc>().add(AuthIsUserLoggedIn());
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: AppTheme.darkThemeMode,
       debugShowCheckedModeBanner: false,
-      home: const LoginPage(),
+      home: BlocSelector<AppUserCubit, AppUserState, bool>(
+        selector: (state) {
+          return state is AppUserLoggedIn;
+        },
+        builder: (context, isLoggedin) {
+          if (isLoggedin) {
+            return const Scaffold(
+              body: Center(
+                child: Text("isLoggedin"),
+              ),
+            );
+          }
+          return const LoginPage();
+        },
+      ),
     );
   }
 }
